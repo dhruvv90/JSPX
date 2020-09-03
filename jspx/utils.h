@@ -4,15 +4,13 @@
 #include "jspx.h"
 #include <string>
 
-
 JSPX_NAMESPACE_BEGIN
 
+
 class ChWrapper {
-
+        
 public:
-    ChWrapper(const char* ch) : src_(ch), current_(ch), offset_(0) {
-
-    }
+    ChWrapper(const char* ch) : src_(ch), current_(ch), offset_(0) { }
 
     const char Peek() const {
         return *current_;
@@ -40,23 +38,18 @@ public:
             if (*low == '\0') {
                 break;
             }
-
             low--;
         }
 
         for (size_t i = 0; i < offset; i++) {
-
             if (*high == '\0') {
                 break;
             }
-
             high++;
         }
-
         size_t length = high - low;
         return std::string(low, length);
     }
-
 
 private:
     const char* const src_;

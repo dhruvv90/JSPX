@@ -1,7 +1,6 @@
 #ifndef JSPX_DOCUMENT_H
 #define JSPX_DOCUMENT_H
 
-
 #include "jspx.h"
 #include "error.h"
 #include <string>
@@ -9,24 +8,31 @@
 #include <memory>
 #include <cctype>
 
-
 JSPX_NAMESPACE_BEGIN
+
+
+enum Identifier {
+    kOpenSquareBracket = '[',
+    kCloseSquareBracket = ']',
+    kOpenCurlyBracket = '{',
+    kCloseCurlyBracket = '}',
+
+    kColon = ':',
+    kComma = ',',
+    kQuote = '"',
+};
+
+enum ParsingType {
+    kParsingTypeIterative,
+    kParsingTypeRecursive
+};
 
 
 class Entity : public virtual Throwable {
 
-
-    /*****
-    **
-    **	Class Member Variables
-    **
-    *****/
-
-
 private:
 
     typedef typename std::unique_ptr<Entity> EntitySP;
-
     enum Type {
         kTypeObject,
         kTypeArray,
@@ -36,7 +42,6 @@ private:
         kTypeNull,
         kTypeEmpty
     };
-
 
     struct Vault {
         std::string s;
@@ -48,62 +53,40 @@ private:
             d = NULL;
             b = false;
         }
-
-
     } vault_;
 
-
     Type type_;
-
     std::unordered_map<std::string, EntitySP> o_members_;
-
     std::vector<EntitySP> a_members_;
-
-
-    /*****
-    **
-    **	Copy and Move Constructors
-    **
-    *****/
 
 
 public:
 
     Entity(const Entity& rhs) = delete;
-
     Entity& operator = (const Entity& rhs) = delete;
 
     Entity& operator = (Entity&& rhs) noexcept {
-
         if (*this == rhs) {
             return *this;
         }
-
         Flush();
-
         o_members_ = std::move(rhs.o_members_);
         a_members_ = std::move(rhs.a_members_);
         type_ = rhs.type_;
         vault_ = rhs.vault_;
-
         rhs.Flush();
-
         return *this;
     };
 
     Entity(Entity&& rhs) noexcept {
-
         if (*this == rhs) {
             return;
         }
-
         Flush();
-
         o_members_ = std::move(rhs.o_members_);
         a_members_ = std::move(rhs.a_members_);
         type_ = rhs.type_;
         vault_ = rhs.vault_;
-
         rhs.Flush();
     };
 
@@ -111,27 +94,16 @@ public:
         if (type_ != rhs.type_) {
             return false;
         }
-
         switch (type_)
         {
         case kTypeObject:
             return o_members_ == rhs.o_members_;
-
         case kTypeArray:
             return a_members_ == rhs.a_members_;
-
         default:
             return (vault_.s == rhs.vault_.s) && (vault_.d == rhs.vault_.d) && (vault_.b == rhs.vault_.b);
         }
     }
-
-
-    /*****
-    **
-    **	Class Constructors
-    **
-    *****/
-
 
 public:
 
@@ -171,13 +143,6 @@ private:
         }
     }
 
-
-    /*****
-    **
-    **	Class Member Functions
-    **
-    *****/
-
 protected:
 
     void Flush() {
@@ -196,8 +161,6 @@ protected:
         }
         return true;
     }
-
-
 
 public:
 
@@ -225,8 +188,6 @@ public:
         return type_ == kTypeNull;
     }
 
-
-
     std::string GetString() const {
         if (IsString())
             return vault_.s;
@@ -244,8 +205,6 @@ public:
             return vault_.d;
         ThrowInvalidMethodCall();
     }
-
-
 
     void SetNumber(double d) {
         Flush();
@@ -270,9 +229,6 @@ public:
         this->SetType(kTypeNull);
         this->vault_.Clear();
     }
-
-
-
 
     bool HasMember(const std::string& key) const {
         return o_members_.count(key) > 0;
@@ -305,8 +261,6 @@ public:
         }
         return *a_members_.at(idx).get();
     }
-
-
 
 private:
 
@@ -342,7 +296,6 @@ private:
         return result;
     }
 
-
     bool CheckChar(ChWrapper& ch, const char& target, bool consumeIfMatch = false) const
     {
         bool result = ch.Peek() == target;
@@ -351,9 +304,6 @@ private:
         }
         return result;
     }
-
-
-
 
     void ParseTrue(ChWrapper& ch, Entity& e) const {
         ParseStringLiteral(ch, "true");
@@ -374,10 +324,8 @@ private:
         e.SetType(kTypeNull);
     }
 
-
     void ParseString(ChWrapper& ch, Entity& e) const {
         EnsureChar(ch, kQuote, true);
-
         std::string word;
 
         while (!CompareIdentifier(ch, kQuote, true)) {
@@ -392,13 +340,11 @@ private:
 
     void ParseObject(ChWrapper& ch, Entity& e) const {
         e.SetType(kTypeObject);
-
         EnsureChar(ch, kOpenCurlyBracket, true);
         SkipWhitespace(ch);
 
         if (CompareIdentifier(ch, kCloseCurlyBracket, true))
             return;
-
         SkipWhitespace(ch);
 
         while (true) {
@@ -429,13 +375,10 @@ private:
 
     void ParseArray(ChWrapper& ch, Entity& e) const {
         e.SetType(kTypeArray);
-
         EnsureChar(ch, kOpenSquareBracket, true);
         SkipWhitespace(ch);
-
         if (CompareIdentifier(ch, kCloseSquareBracket, true))
             return;
-
         SkipWhitespace(ch);
 
         while (true) {
@@ -443,7 +386,6 @@ private:
             Entity member;
             ParseValue(ch, member);
             SkipWhitespace(ch);
-
             e.a_members_.push_back(std::make_unique<Entity>(std::move(member)));
 
             SkipWhitespace(ch);
@@ -451,14 +393,12 @@ private:
                 break;
 
             EnsureChar(ch, kComma, true);
-
             SkipWhitespace(ch);
         }
     }
 
     void ParseNumber(ChWrapper& ch, Entity& e) const {
         SkipWhitespace(ch);
-
         try {
             if (CheckChar(ch, '-') || (std::isdigit(ch.Peek()) && !CheckChar(ch, '0')))
             {
@@ -466,9 +406,7 @@ private:
 
                 std::string number;
                 bool hasDecimal = false;
-
                 number.push_back(ch.Pop());
-
                 SkipWhitespace(ch);
 
                 while (std::isdigit(ch.Peek()) || CheckChar(ch, '.')) {
@@ -498,59 +436,41 @@ private:
         }
     }
 
-
 protected:
+
     void ParseValue(ChWrapper& ch, Entity& e) const {
         SkipWhitespace(ch);
 
         switch (ch.Peek())
         {
         case ('{'):
-        {
             ParseObject(ch, e);
             break;
-        }
         case ('['):
-        {
             ParseArray(ch, e);
             break;
-        }
         case ('"'):
-        {
             ParseString(ch, e);
             break;
-        }
         case ('t'):
-        {
             ParseTrue(ch, e);
             break;
-        }
         case ('f'):
-        {
             ParseFalse(ch, e);
             break;
-        }
         case ('n'):
-        {
             ParseNull(ch, e);
             break;
-        }
         default:
-        {
             ParseNumber(ch, e);
             break;
         }
-        }
     }
-
-
 };
-
 
 
 class Document : public virtual Entity
 {
-
 public:
 
     enum ParseResult {
@@ -561,24 +481,18 @@ public:
 
     ParseResult parseResult;
     std::string parseMessage;
-
     const char* test;
 
-
-
 public:
+
     Document(const Document&) = delete;
     Document& operator = (const Document& rhs) = delete;
-
     Document(Document&& rhs) = delete;
     Document& operator = (Document&&) noexcept = delete;
 
-
-
 public:
-    Document() : parseResult(kParseNotStarted) {
-    }
 
+    Document() : parseResult(kParseNotStarted) { }
 
 public:
 
@@ -590,7 +504,6 @@ public:
                 ParseRecursive(ch, *this);
             else
                 ThrowUnsupportedOperation();
-
             parseResult = kParseSuccessful;
         }
         catch (const std::exception& e) {
@@ -604,7 +517,6 @@ public:
     void Parse(ChWrapper ch) {
         GenericParse<kParsingTypeRecursive>(ch);
     }
-
         
 private:
     
@@ -615,7 +527,6 @@ private:
 
     void ParseRecursive(ChWrapper& ch, Entity& e) {
         ParseValue(ch, e);
-
         if (!IsEndOfStream(ch)) {
             ThrowInvalidIdentifier(ch);
         }

@@ -10,7 +10,7 @@ JSPX_NAMESPACE_BEGIN
 
 
 class Throwable {
-
+        
 protected:
 
     static void ThrowInvalidIdentifier(const ChWrapper& ch, size_t offset = 10) {
@@ -27,7 +27,6 @@ protected:
     static void ThrowUnsupportedOperation() {
         throw std::exception("Unsupported Operation");
     }
-
 };
 
 JSPX_NAMESPACE_END

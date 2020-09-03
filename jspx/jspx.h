@@ -13,20 +13,20 @@ Common Preprocessor / macro declarations for the project can be declared here.
 */
 
 enum Identifier {
-	kOpenSquareBracket = '[',
-	kCloseSquareBracket = ']',
-	kOpenCurlyBracket = '{',
-	kCloseCurlyBracket = '}',
+    kOpenSquareBracket = '[',
+    kCloseSquareBracket = ']',
+    kOpenCurlyBracket = '{',
+    kCloseCurlyBracket = '}',
 
-	kColon = ':',
-	kComma = ',',
-	kQuote = '"',
+    kColon = ':',
+    kComma = ',',
+    kQuote = '"',
 };
 
 
 enum ParsingType {
-	kParsingTypeIterative,
-	kParsingTypeRecursive
+    kParsingTypeIterative,
+    kParsingTypeRecursive
 };
 
 

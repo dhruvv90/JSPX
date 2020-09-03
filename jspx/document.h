@@ -469,7 +469,7 @@ public:
     };
     ParseResult parseResult;
     std::string parseMessage;
-    const char* test;
+    ChWrapper test;
 
 public:
     Document(const Document&) = delete;
@@ -493,7 +493,7 @@ public:
             Flush();
             parseResult = kParseError;
             parseMessage = e.what();
-            test = std::move(e.what());
+            test = e.what();
         }
     }
 

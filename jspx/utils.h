@@ -6,7 +6,6 @@
 
 JSPX_NAMESPACE_BEGIN
 
-
 class ChWrapper {
         
 public:
@@ -40,7 +39,6 @@ public:
             }
             low--;
         }
-
         for (size_t i = 0; i < offset; i++) {
             if (*high == '\0') {
                 break;

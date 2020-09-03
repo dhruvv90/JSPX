@@ -10,7 +10,6 @@
 
 JSPX_NAMESPACE_BEGIN
 
-
 enum Identifier {
     kOpenSquareBracket = '[',
     kCloseSquareBracket = ']',
@@ -31,7 +30,6 @@ enum ParsingType {
 class Entity : public virtual Throwable {
 
 private:
-
     typedef typename std::unique_ptr<Entity> EntitySP;
     enum Type {
         kTypeObject,
@@ -59,9 +57,7 @@ private:
     std::unordered_map<std::string, EntitySP> o_members_;
     std::vector<EntitySP> a_members_;
 
-
 public:
-
     Entity(const Entity& rhs) = delete;
     Entity& operator = (const Entity& rhs) = delete;
 
@@ -106,7 +102,6 @@ public:
     }
 
 public:
-
     Entity() : type_(kTypeEmpty) {	}
 
     explicit Entity(std::string s) : type_(kTypeString) {
@@ -126,7 +121,6 @@ public:
     }
 
 private:
-
     explicit Entity(Type t) : type_(t) {
         switch (t)
         {
@@ -144,7 +138,6 @@ private:
     }
 
 protected:
-
     void Flush() {
         SetType(kTypeEmpty);
         o_members_.clear();
@@ -163,7 +156,6 @@ protected:
     }
 
 public:
-
     bool IsObject() const {
         return type_ == kTypeObject;
     }
@@ -263,7 +255,6 @@ public:
     }
 
 private:
-
     void SetType(Type t) {
         type_ = t;
     }
@@ -437,10 +428,8 @@ private:
     }
 
 protected:
-
     void ParseValue(ChWrapper& ch, Entity& e) const {
         SkipWhitespace(ch);
-
         switch (ch.Peek())
         {
         case ('{'):
@@ -471,30 +460,24 @@ protected:
 
 class Document : public virtual Entity
 {
-public:
 
+public:
     enum ParseResult {
         kParseNotStarted,
         kParseSuccessful,
         kParseError
     };
-
     ParseResult parseResult;
     std::string parseMessage;
     const char* test;
 
 public:
-
     Document(const Document&) = delete;
     Document& operator = (const Document& rhs) = delete;
     Document(Document&& rhs) = delete;
     Document& operator = (Document&&) noexcept = delete;
 
-public:
-
     Document() : parseResult(kParseNotStarted) { }
-
-public:
 
     template <unsigned ParsingType>
     void GenericParse(ChWrapper& ch) {
@@ -519,7 +502,6 @@ public:
     }
         
 private:
-    
     void Flush() {
         Entity::Flush();
         parseMessage.clear();
@@ -532,7 +514,6 @@ private:
         }
     }
 };
-
 
 JSPX_NAMESPACE_END
 

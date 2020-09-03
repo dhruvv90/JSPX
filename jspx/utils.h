@@ -46,18 +46,21 @@ public:
         src_(0),
         current_(0),
         offset_(0),
-        is_dynamic_(false) { }
+        is_dynamic_(false) 
+    { }
 
     ChWrapper(const char* ch) :
         src_(ch),
         current_(ch),
         offset_(0),
-        is_dynamic_(false) { }
+        is_dynamic_(false) 
+    { }
 
     ChWrapper(const char* ch, size_t s) :
         src_(ch),
         offset_(0),
-        is_dynamic_(true) {
+        is_dynamic_(true) 
+    {
         auto temp = new char[s];
         for (size_t i = 0; i < s; i++) {
             temp[i] = ch[i];
@@ -68,7 +71,8 @@ public:
     ChWrapper(const char* ch, bool createCopy) :
         src_(ch),
         offset_(0),
-        is_dynamic_(createCopy) {
+        is_dynamic_(createCopy) 
+    {
         if (!createCopy) {
             ChWrapper::ChWrapper(ch);
         }

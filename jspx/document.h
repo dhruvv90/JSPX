@@ -10,7 +10,7 @@
 
 JSPX_NAMESPACE_BEGIN
 
-enum Identifier {
+enum class Identifier {
     kOpenSquareBracket = '[',
     kCloseSquareBracket = ']',
     kOpenCurlyBracket = '{',
@@ -21,7 +21,7 @@ enum Identifier {
     kQuote = '"',
 };
 
-enum ParsingType {
+enum class ParsingType {
     kParsingTypeIterative,
     kParsingTypeRecursive
 };
@@ -31,7 +31,7 @@ class Entity : public virtual Throwable {
 
 private:
     typedef typename std::unique_ptr<Entity> EntitySP;
-    enum Type {
+    enum class Type {
         kTypeObject,
         kTypeArray,
         kTypeString,
@@ -92,9 +92,9 @@ public:
         }
         switch (type_)
         {
-        case kTypeObject:
+        case Type::kTypeObject:
             return o_members_ == rhs.o_members_;
-        case kTypeArray:
+        case Type::kTypeArray:
             return a_members_ == rhs.a_members_;
         default:
             return (vault_.s == rhs.vault_.s) && (vault_.d == rhs.vault_.d) && (vault_.b == rhs.vault_.b);
@@ -102,21 +102,21 @@ public:
     }
 
 public:
-    Entity() : type_(kTypeEmpty) {	}
+    Entity() : type_(Type::kTypeEmpty) {	}
 
-    explicit Entity(std::string s) : type_(kTypeString) {
+    explicit Entity(std::string s) : type_(Type::kTypeString) {
         vault_.s = s;
     }
 
-    explicit Entity(const char* ch) : type_(kTypeString) {
+    explicit Entity(const char* ch) : type_(Type::kTypeString) {
         vault_.s = ch;
     }
 
-    explicit Entity(const double d) : type_(kTypeNumber) {
+    explicit Entity(const double d) : type_(Type::kTypeNumber) {
         vault_.d = d;
     }
 
-    explicit Entity(bool b) : type_(kTypeBoolean) {
+    explicit Entity(bool b) : type_(Type::kTypeBoolean) {
         vault_.b = b;
     }
 
@@ -124,13 +124,13 @@ private:
     explicit Entity(Type t) : type_(t) {
         switch (t)
         {
-        case kTypeObject:
+        case Type::kTypeObject:
             break;
-        case kTypeArray:
+        case Type::kTypeArray:
             break;
-        case kTypeString:
+        case Type::kTypeString:
             break;
-        case kTypeNull:
+        case Type::kTypeNull:
             break;
         default:
             ThrowInvalidMethodCall();
@@ -139,7 +139,7 @@ private:
 
 protected:
     void Flush() {
-        SetType(kTypeEmpty);
+        SetType(Type::kTypeEmpty);
         o_members_.clear();
         a_members_.clear();
         vault_.Clear();
@@ -157,27 +157,27 @@ protected:
 
 public:
     bool IsObject() const {
-        return type_ == kTypeObject;
+        return type_ == Type::kTypeObject;
     }
 
     bool IsArray() const {
-        return type_ == kTypeArray;
+        return type_ == Type::kTypeArray;
     }
 
     bool IsString() const {
-        return type_ == kTypeString;
+        return type_ == Type::kTypeString;
     }
 
     bool IsNumber() const {
-        return type_ == kTypeNumber;
+        return type_ == Type::kTypeNumber;
     }
 
     bool IsBoolean() const {
-        return type_ == kTypeBoolean;
+        return type_ == Type::kTypeBoolean;
     }
 
     bool IsNull() const {
-        return type_ == kTypeNull;
+        return type_ == Type::kTypeNull;
     }
 
     std::string GetString() const {
@@ -200,25 +200,25 @@ public:
 
     void SetNumber(double d) {
         Flush();
-        this->SetType(kTypeNumber);
+        this->SetType(Type::kTypeNumber);
         this->vault_.d = d;
     }
 
     void SetString(std::string s) {
         Flush();
-        this->SetType(kTypeString);
+        this->SetType(Type::kTypeString);
         this->vault_.s = std::move(s);
     }
 
     void SetBool(bool b) {
         Flush();
-        this->SetType(kTypeBoolean);
+        this->SetType(Type::kTypeBoolean);
         this->vault_.b = b;
     }
 
     void SetNull() {
         Flush();
-        this->SetType(kTypeNull);
+        this->SetType(Type::kTypeNull);
         this->vault_.Clear();
     }
 
@@ -298,43 +298,43 @@ private:
 
     void ParseTrue(ChWrapper& ch, Entity& e) const {
         ParseStringLiteral(ch, "true");
-        e.SetType(kTypeBoolean);
+        e.SetType(Type::kTypeBoolean);
         e.vault_.b = true;
     }
 
     void ParseFalse(ChWrapper& ch, Entity& e) const {
         ParseStringLiteral(ch, "false");
 
-        e.SetType(kTypeBoolean);
+        e.SetType(Type::kTypeBoolean);
         e.vault_.b = false;
     }
 
     void ParseNull(ChWrapper& ch, Entity& e) const {
         ParseStringLiteral(ch, "null");
 
-        e.SetType(kTypeNull);
+        e.SetType(Type::kTypeNull);
     }
 
     void ParseString(ChWrapper& ch, Entity& e) const {
-        EnsureChar(ch, kQuote, true);
+        EnsureChar(ch, Identifier::kQuote, true);
         std::string word;
 
-        while (!CompareIdentifier(ch, kQuote, true)) {
+        while (!CompareIdentifier(ch, Identifier::kQuote, true)) {
             if (ch.Peek() == '\0')
                 ThrowInvalidIdentifier(ch);
             word.push_back(ch.Pop());
         }
 
-        e.SetType(kTypeString);
+        e.SetType(Type::kTypeString);
         e.vault_.s = std::move(word);
     }
 
     void ParseObject(ChWrapper& ch, Entity& e) const {
-        e.SetType(kTypeObject);
-        EnsureChar(ch, kOpenCurlyBracket, true);
+        e.SetType(Type::kTypeObject);
+        EnsureChar(ch, Identifier::kOpenCurlyBracket, true);
         SkipWhitespace(ch);
 
-        if (CompareIdentifier(ch, kCloseCurlyBracket, true))
+        if (CompareIdentifier(ch, Identifier::kCloseCurlyBracket, true))
             return;
         SkipWhitespace(ch);
 
@@ -344,7 +344,7 @@ private:
             ParseString(ch, key);
             SkipWhitespace(ch);
 
-            EnsureChar(ch, kColon, true);
+            EnsureChar(ch, Identifier::kColon, true);
             SkipWhitespace(ch);
 
             Entity value;
@@ -356,19 +356,19 @@ private:
                 std::make_unique<Entity>(std::move(value))
             );
 
-            if (CompareIdentifier(ch, kCloseCurlyBracket, true))
+            if (CompareIdentifier(ch, Identifier::kCloseCurlyBracket, true))
                 break;
 
-            EnsureChar(ch, kComma, true);
+            EnsureChar(ch, Identifier::kComma, true);
             SkipWhitespace(ch);
         }
     }
 
     void ParseArray(ChWrapper& ch, Entity& e) const {
-        e.SetType(kTypeArray);
-        EnsureChar(ch, kOpenSquareBracket, true);
+        e.SetType(Type::kTypeArray);
+        EnsureChar(ch, Identifier::kOpenSquareBracket, true);
         SkipWhitespace(ch);
-        if (CompareIdentifier(ch, kCloseSquareBracket, true))
+        if (CompareIdentifier(ch, Identifier::kCloseSquareBracket, true))
             return;
         SkipWhitespace(ch);
 
@@ -380,10 +380,10 @@ private:
             e.a_members_.push_back(std::make_unique<Entity>(std::move(member)));
 
             SkipWhitespace(ch);
-            if (CompareIdentifier(ch, kCloseSquareBracket, true))
+            if (CompareIdentifier(ch, Identifier::kCloseSquareBracket, true))
                 break;
 
-            EnsureChar(ch, kComma, true);
+            EnsureChar(ch, Identifier::kComma, true);
             SkipWhitespace(ch);
         }
     }
@@ -393,7 +393,7 @@ private:
         try {
             if (CheckChar(ch, '-') || (std::isdigit(ch.Peek()) && !CheckChar(ch, '0')))
             {
-                e.SetType(kTypeNumber);
+                e.SetType(Type::kTypeNumber);
 
                 std::string number;
                 bool hasDecimal = false;
@@ -461,7 +461,7 @@ protected:
 class Document : public virtual Entity {
 
 public:
-    enum ParseResult {
+    enum class ParseResult {
         kParseNotStarted,
         kParseSuccessful,
         kParseError
@@ -475,27 +475,27 @@ public:
     Document(Document&& rhs) = delete;
     Document& operator = (Document&&) noexcept = delete;
 
-    Document() : parseResult(kParseNotStarted) { }
+    Document() : parseResult(ParseResult::kParseNotStarted) { }
 
-    template <unsigned ParsingType>
+    template <ParsingType ParsingType>
     void GenericParse(const char* ch) {
         Flush();
         try {
-            if (ParsingType == kParsingTypeRecursive)
+            if (ParsingType == ParsingType::kParsingTypeRecursive)
                 ParseRecursive(ch, *this);
             else
                 ThrowUnsupportedOperation();
-            parseResult = kParseSuccessful;
+            parseResult = ParseResult::kParseSuccessful;
         }
         catch (const std::exception& e) {
             Flush();
-            parseResult = kParseError;
+            parseResult = ParseResult::kParseError;
             parseMessage = e.what();
         }
     }
 
     void Parse(const char* ch) {
-        GenericParse<kParsingTypeRecursive>(ch);
+        GenericParse<ParsingType::kParsingTypeRecursive>(ch);
     }
 
 private:

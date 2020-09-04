@@ -52,6 +52,8 @@ private:
     std::vector<EntitySP> a_members_;
 
 public:
+    Entity() : type_(Type::kTypeEmpty) { }
+
     Entity(const Entity& rhs) = delete;
     Entity& operator = (const Entity& rhs) = delete;
 
@@ -95,13 +97,7 @@ public:
         }
     }
 
-public:
-    Entity() : type_(Type::kTypeEmpty) {	}
-
-    explicit Entity(std::string s) : type_(Type::kTypeString) {
-        vault_.s = s;
-    }
-
+private:
     explicit Entity(const char* ch) : type_(Type::kTypeString) {
         vault_.s = ch;
     }
@@ -114,7 +110,6 @@ public:
         vault_.b = b;
     }
 
-private:
     explicit Entity(Type t) : type_(t) {
         switch (t)
         {
@@ -174,7 +169,7 @@ public:
         return type_ == Type::kTypeNull;
     }
 
-    std::string GetString() const {
+    const std::string& GetString() const {
         if (IsString())
             return vault_.s;
         ThrowInvalidMethodCall();
@@ -305,7 +300,6 @@ private:
 
     void ParseNull(ChWrapper& ch, Entity& e) const {
         ParseStringLiteral(ch, "null");
-
         e.SetType(Type::kTypeNull);
     }
 

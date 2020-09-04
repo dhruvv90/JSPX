@@ -9,9 +9,7 @@
 
 JSPX_NAMESPACE_BEGIN
 
-
 typedef unsigned char      uint8_t;
-
 
 JSPX_NAMESPACE_END
 

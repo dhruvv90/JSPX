@@ -118,11 +118,6 @@ public:
         is_dynamic_ = false;
     }
 
-    void SkipWhitespace(ChWrapper& ch) const {
-        while (ch.Peek() == ' ' || ch.Peek() == '\n' || ch.Peek() == '\t')
-            ch.Pop();
-    }
-
     std::string GetCurrentSnippet(uint8_t offset) const {
         if (!current_)
             return std::string();

@@ -11,9 +11,9 @@ JSPX_NAMESPACE_BEGIN
 class Throwable {
 
 protected:
-    static void ThrowInvalidIdentifier(const ChWrapper& ch, size_t offset = 10) {
+    static void ThrowInvalidIdentifier(const ChWrapper& ch, uint8_t offset = 10) {
         std::string details = ch.GetSnippet(offset);
-        std::string message = "Invalid Identifier in input at : ";	
+        std::string message = "Invalid Identifier in input at : ";
         throw std::exception(message.append(details).c_str());
     }
 

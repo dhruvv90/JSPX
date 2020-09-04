@@ -10,27 +10,21 @@
 
 JSPX_NAMESPACE_BEGIN
 
-enum class Identifier {
-    kOpenSquareBracket = '[',
-    kCloseSquareBracket = ']',
-    kOpenCurlyBracket = '{',
-    kCloseCurlyBracket = '}',
-
-    kColon = ':',
-    kComma = ',',
-    kQuote = '"',
-};
-
-enum class ParsingType {
-    kParsingTypeIterative,
-    kParsingTypeRecursive
-};
-
-
 class Entity : public virtual Throwable {
 
 private:
     typedef typename std::unique_ptr<Entity> EntitySP;
+
+    enum class Identifier {
+        kOpenSquareBracket = '[',
+        kCloseSquareBracket = ']',
+        kOpenCurlyBracket = '{',
+        kCloseCurlyBracket = '}',
+        kColon = ':',
+        kComma = ',',
+        kQuote = '"',
+    };
+
     enum class Type {
         kTypeObject,
         kTypeArray,
@@ -465,6 +459,11 @@ public:
         kParseNotStarted,
         kParseSuccessful,
         kParseError
+    };
+
+    enum class ParsingType {
+        kParsingTypeIterative,
+        kParsingTypeRecursive
     };
     ParseResult parseResult;
     ChWrapper parseMessage;

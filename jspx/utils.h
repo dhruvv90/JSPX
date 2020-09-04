@@ -35,7 +35,7 @@ public:
     ChWrapper(const ChWrapper&) = delete;
     ChWrapper& operator= (const ChWrapper& rhs) = delete;
     ChWrapper(ChWrapper&& rhs) = delete;
-    
+
     ChWrapper& operator = (ChWrapper&& rhs) noexcept {
         this->~ChWrapper();
         if (!rhs.src_)

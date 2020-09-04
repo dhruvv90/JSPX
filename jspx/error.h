@@ -19,7 +19,6 @@ protected:
 
     static void ThrowInvalidMethodCall() {
         throw std::exception("Invalid Method Call");
-
     }
 
     static void ThrowUnsupportedOperation() {

@@ -480,7 +480,7 @@ public:
     Document() : parseResult(kParseNotStarted) { }
 
     template <unsigned ParsingType>
-    void GenericParse(ChWrapper& ch) {
+    void GenericParse(const char* ch) {
         Flush();
         try {
             if (ParsingType == kParsingTypeRecursive)
@@ -497,7 +497,7 @@ public:
         }
     }
 
-    void Parse(ChWrapper ch) {
+    void Parse(const char* ch) {
         GenericParse<kParsingTypeRecursive>(ch);
     }
         
@@ -507,7 +507,7 @@ private:
         parseMessage.clear();
     }
 
-    void ParseRecursive(ChWrapper& ch, Entity& e) {
+    void ParseRecursive(ChWrapper ch, Entity& e) {
         ParseValue(ch, e);
         if (!IsEndOfStream(ch)) {
             ThrowInvalidIdentifier(ch);

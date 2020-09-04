@@ -187,25 +187,25 @@ public:
         ThrowInvalidMethodCall();
     }
 
-    void SetNumber(double d) {
+    void SetAsNumber(double d) {
         Flush();
         this->SetType(Type::kTypeNumber);
         this->vault_.d = d;
     }
 
-    void SetString(const std::string& s) {
+    void SetAsString(const std::string& s) {
         Flush();
         this->SetType(Type::kTypeString);
         this->vault_.s = s;
     }
 
-    void SetBool(bool b) {
+    void SetAsBool(bool b) {
         Flush();
         this->SetType(Type::kTypeBoolean);
         this->vault_.b = b;
     }
 
-    void SetNull() {
+    void SetAsNull() {
         Flush();
         this->SetType(Type::kTypeNull);
         this->vault_.Flush();

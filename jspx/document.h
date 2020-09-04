@@ -36,13 +36,13 @@ private:
     };
 
     struct Vault {
-        std::string s;
         double d;
         bool b;
+        std::string s;
 
-        void Clear() {
+        void Flush() {
             s.clear();
-            d = NULL;
+            d = 0;
             b = false;
         }
     } vault_;
@@ -136,7 +136,7 @@ protected:
         SetType(Type::kTypeEmpty);
         o_members_.clear();
         a_members_.clear();
-        vault_.Clear();
+        vault_.Flush();
     }
 
     bool IsEndOfStream(ChWrapper& ch) const {
@@ -198,10 +198,10 @@ public:
         this->vault_.d = d;
     }
 
-    void SetString(std::string s) {
+    void SetString(const std::string& s) {
         Flush();
         this->SetType(Type::kTypeString);
-        this->vault_.s = std::move(s);
+        this->vault_.s = s;
     }
 
     void SetBool(bool b) {
@@ -213,7 +213,7 @@ public:
     void SetNull() {
         Flush();
         this->SetType(Type::kTypeNull);
-        this->vault_.Clear();
+        this->vault_.Flush();
     }
 
     bool HasMember(const std::string& key) const {

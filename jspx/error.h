@@ -12,7 +12,7 @@ class Throwable {
 
 protected:
     static void ThrowInvalidIdentifier(const ChWrapper& ch, uint8_t offset = 10) {
-        std::string details = ch.GetSnippet(offset);
+        std::string details = ch.GetCurrentSnippet(offset);
         std::string message = "Invalid Identifier in input at : ";
         throw std::exception(message.append(details).c_str());
     }

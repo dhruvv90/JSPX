@@ -33,9 +33,20 @@ private:
 
 public:
     ChWrapper(const ChWrapper&) = delete;
-    ChWrapper& operator= (const ChWrapper& rhs) = delete;
-    ChWrapper(ChWrapper&& rhs) = delete;
+    ChWrapper& operator= (const ChWrapper& rhs) {
+        this->~ChWrapper();
+        if (!rhs.src_)
+            return *this;
 
+        const char* tmp = DeepClone(rhs.src_);
+        current_ = tmp;
+        src_ = tmp;
+        offset_ = 0;
+        is_dynamic_ = true;
+        return *this;
+    };
+
+    ChWrapper(ChWrapper&& rhs) = delete;
     ChWrapper& operator = (ChWrapper&& rhs) noexcept {
         this->~ChWrapper();
         if (!rhs.src_)
@@ -63,6 +74,19 @@ public:
         is_dynamic_(false)
     { }
 
+    ChWrapper(const std::string& s) {
+        uint8_t length = s.length();
+        char* temp = new char[length + 1];
+        for (uint8_t i = 0; i < length; i++)
+            temp[i] = s[i];
+        temp[length] = '\0';
+
+        current_ = temp;
+        src_ = temp;
+        offset_ = 0;
+        is_dynamic_ = true;
+    }
+
     ~ChWrapper() {
         if (is_dynamic_)
             delete[] current_;
@@ -82,6 +106,8 @@ public:
     }
 
     std::string GetString() const {
+        if (!src_)
+            return std::string();
         return std::string(src_);
     }
 
@@ -97,7 +123,10 @@ public:
             ch.Pop();
     }
 
-    std::string GetSnippet(uint8_t offset) const {
+    std::string GetCurrentSnippet(uint8_t offset) const {
+        if (!current_)
+            return std::string();
+
         const char* low = current_;
         const char* high = current_;
 

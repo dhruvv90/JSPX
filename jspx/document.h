@@ -458,8 +458,7 @@ protected:
 };
 
 
-class Document : public virtual Entity
-{
+class Document : public virtual Entity {
 
 public:
     enum ParseResult {
@@ -468,8 +467,7 @@ public:
         kParseError
     };
     ParseResult parseResult;
-    std::string parseMessage;
-    ChWrapper test;
+    ChWrapper parseMessage;
 
 public:
     Document(const Document&) = delete;
@@ -493,18 +491,17 @@ public:
             Flush();
             parseResult = kParseError;
             parseMessage = e.what();
-            test = e.what();
         }
     }
 
     void Parse(const char* ch) {
         GenericParse<kParsingTypeRecursive>(ch);
     }
-        
+
 private:
     void Flush() {
         Entity::Flush();
-        parseMessage.clear();
+        parseMessage.Flush();
     }
 
     void ParseRecursive(ChWrapper ch, Entity& e) {

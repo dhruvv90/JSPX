@@ -11,34 +11,41 @@ class ChWrapper {
 private:
     const char* src_;
     const char* current_;
-    size_t offset_;
     bool is_dynamic_;
+    uint8_t offset_;
+
+private:
+    uint8_t GetLength(const char* ch) const {
+        uint8_t length = 0;
+        while (*ch++ != '\0')
+            length++;
+        return length;
+    }
+
+    const char* DeepClone(const char* source) const {
+        uint8_t length = GetLength(source);
+        char* target = new char[length + 1];
+        for (uint8_t i = 0; i < length; i++)
+            target[i] = source[i];
+        target[length] = '\0';
+        return target;
+    }
 
 public:
     ChWrapper(const ChWrapper&) = delete;
-    ChWrapper& operator = (const ChWrapper& rhs) = delete;
+    ChWrapper& operator= (const ChWrapper& rhs) = delete;
     ChWrapper(ChWrapper&& rhs) = delete;
-
+    
     ChWrapper& operator = (ChWrapper&& rhs) noexcept {
         this->~ChWrapper();
+        if (!rhs.src_)
+            return *this;
 
-        size_t size = 0;
-        {
-            const char* temp = rhs.current_;
-            while (*temp++ != '\0') {
-                size++;
-            }
-        }
-
-        auto temp = new char[size];
-        for (size_t i = 0; i < size; i++) {
-            temp[i] = rhs.current_[i];
-        }
-        current_ = temp;
-        src_ = temp;
+        const char* tmp = DeepClone(rhs.src_);
+        current_ = tmp;
+        src_ = tmp;
         offset_ = 0;
         is_dynamic_ = true;
-
         return *this;
     };
 
@@ -46,50 +53,19 @@ public:
         src_(0),
         current_(0),
         offset_(0),
-        is_dynamic_(false) 
+        is_dynamic_(false)
     { }
 
     ChWrapper(const char* ch) :
         src_(ch),
         current_(ch),
         offset_(0),
-        is_dynamic_(false) 
+        is_dynamic_(false)
     { }
 
-    ChWrapper(const char* ch, size_t s) :
-        src_(ch),
-        offset_(0),
-        is_dynamic_(true) 
-    {
-        auto temp = new char[s];
-        for (size_t i = 0; i < s; i++) {
-            temp[i] = ch[i];
-        }
-        current_ = temp;
-    }
-
-    ChWrapper(const char* ch, bool createCopy) :
-        src_(ch),
-        offset_(0),
-        is_dynamic_(createCopy) 
-    {
-        if (!createCopy) {
-            ChWrapper::ChWrapper(ch);
-        }
-        else {
-            size_t size;
-            const char* temp = ch;
-            while (*temp++ != '\0') {
-                size++;
-            }
-            ChWrapper::ChWrapper(ch, size);
-        }
-    }
-
     ~ChWrapper() {
-        if (is_dynamic_) {
+        if (is_dynamic_)
             delete[] current_;
-        }
     }
 
     const char Peek() const {
@@ -101,8 +77,19 @@ public:
         return *current_++;
     }
 
-    size_t GetOffset() const {
+    uint8_t GetOffset() const {
         return offset_;
+    }
+
+    std::string GetString() const {
+        return std::string(src_);
+    }
+
+    void Flush() {
+        src_ = NULL;
+        current_ = NULL;
+        offset_ = 0;
+        is_dynamic_ = false;
     }
 
     void SkipWhitespace(ChWrapper& ch) const {
@@ -110,23 +97,23 @@ public:
             ch.Pop();
     }
 
-    std::string GetSnippet(size_t offset) const {
+    std::string GetSnippet(uint8_t offset) const {
         const char* low = current_;
         const char* high = current_;
 
-        for (size_t i = 0; i < std::min(offset, GetOffset()); i++) {
+        for (uint8_t i = 0; i < std::min(offset, GetOffset()); i++) {
             if (*low == '\0') {
                 break;
             }
             low--;
         }
-        for (size_t i = 0; i < offset; i++) {
+        for (uint8_t i = 0; i < offset; i++) {
             if (*high == '\0') {
                 break;
             }
             high++;
         }
-        size_t length = high - low;
+        uint8_t length = high - low;
         return std::string(low, length);
     }
 };

@@ -9,3 +9,5 @@
 /*.cpp
 /Debug
 /.vs
+/packages/*
+/test/*

@@ -45,6 +45,9 @@ private:
             d = 0;
             b = false;
         }
+        bool operator ==(const Vault& rhs) const {
+            return (s == rhs.s) && (d == rhs.d) && (b == rhs.b);
+        }
     } vault_;
 
     Type type_;
@@ -54,32 +57,16 @@ private:
 public:
     Entity() : type_(Type::kTypeEmpty) { }
 
-    Entity(const Entity& rhs) = delete;
+    Entity(const Entity& rhs) noexcept = delete;
     Entity& operator = (const Entity& rhs) = delete;
 
     Entity& operator = (Entity&& rhs) noexcept {
-        if (*this == rhs) {
-            return *this;
-        }
-        Flush();
-        o_members_ = std::move(rhs.o_members_);
-        a_members_ = std::move(rhs.a_members_);
-        type_ = rhs.type_;
-        vault_ = rhs.vault_;
-        rhs.Flush();
+        Move(*this, rhs);
         return *this;
     };
 
     Entity(Entity&& rhs) noexcept {
-        if (*this == rhs) {
-            return;
-        }
-        Flush();
-        o_members_ = std::move(rhs.o_members_);
-        a_members_ = std::move(rhs.a_members_);
-        type_ = rhs.type_;
-        vault_ = rhs.vault_;
-        rhs.Flush();
+        Move(*this, rhs);
     };
 
     bool operator ==(const Entity& rhs) const {
@@ -93,58 +80,10 @@ public:
         case Type::kTypeArray:
             return a_members_ == rhs.a_members_;
         default:
-            return (vault_.s == rhs.vault_.s) && (vault_.d == rhs.vault_.d) && (vault_.b == rhs.vault_.b);
+            return vault_ == rhs.vault_;
         }
     }
-
-private:
-    explicit Entity(const char* ch) : type_(Type::kTypeString) {
-        vault_.s = ch;
-    }
-
-    explicit Entity(const double d) : type_(Type::kTypeNumber) {
-        vault_.d = d;
-    }
-
-    explicit Entity(bool b) : type_(Type::kTypeBoolean) {
-        vault_.b = b;
-    }
-
-    explicit Entity(Type t) : type_(t) {
-        switch (t)
-        {
-        case Type::kTypeObject:
-            break;
-        case Type::kTypeArray:
-            break;
-        case Type::kTypeString:
-            break;
-        case Type::kTypeNull:
-            break;
-        default:
-            ThrowInvalidMethodCall();
-        }
-    }
-
-protected:
-    void Flush() {
-        SetType(Type::kTypeEmpty);
-        o_members_.clear();
-        a_members_.clear();
-        vault_.Flush();
-    }
-
-    bool IsEndOfStream(ChWrapper& ch) const {
-        try {
-            EnsureChar(ch, '\0');
-        }
-        catch (...) {
-            return false;
-        }
-        return true;
-    }
-
-public:
+    
     bool IsObject() const {
         return type_ == Type::kTypeObject;
     }
@@ -187,56 +126,18 @@ public:
         ThrowInvalidMethodCall();
     }
 
-    void SetAsNumber(double d) {
-        Flush();
-        this->SetType(Type::kTypeNumber);
-        this->vault_.d = d;
-    }
-
-    void SetAsString(const std::string& s) {
-        Flush();
-        this->SetType(Type::kTypeString);
-        this->vault_.s = s;
-    }
-
-    void SetAsBool(bool b) {
-        Flush();
-        this->SetType(Type::kTypeBoolean);
-        this->vault_.b = b;
-    }
-
-    void SetAsNull() {
-        Flush();
-        this->SetType(Type::kTypeNull);
-        this->vault_.Flush();
-    }
-
     bool HasMember(const std::string& key) const {
         return o_members_.count(key) > 0;
     }
 
-    /*void AddObjectMember(const std::string& key, const Entity& value) {
-        if (!IsObject()) {
-            ThrowInvalidMethodCall();
-        }
-        o_members_.insert_or_assign(key, std::make_unique<Entity>(std::move(value)));
-    }
-
-    void AddArrayMember(const Entity& value) {
-        if (!IsArray()) {
-            ThrowInvalidMethodCall();
-        }
-        a_members_.push_back(std::make_unique<Entity>(std::move(value)));
-    }*/
-
-    Entity& operator [](const std::string& key) const {
+    const Entity& operator [](const std::string& key) const {
         if (!IsObject()) {
             ThrowInvalidMethodCall();
         }
         return *o_members_.at(key).get();
     }
 
-    Entity& operator [](size_t idx) const {
+    const Entity& operator [](size_t idx) const {
         if (!IsArray()) {
             ThrowInvalidMethodCall();
         }
@@ -244,6 +145,18 @@ public:
     }
 
 private:
+    void Move(Entity& target, Entity& source) {
+        if (target == source) {
+            return;
+        }
+        target.Flush();
+        target.o_members_ = std::move(source.o_members_);
+        target.a_members_ = std::move(source.a_members_);
+        target.type_ = source.type_;
+        target.vault_ = source.vault_;
+        source.Flush();
+    }
+
     void SetType(Type t) {
         type_ = t;
     }
@@ -443,6 +356,13 @@ protected:
             break;
         }
     }
+    
+    void Flush() {
+        SetType(Type::kTypeEmpty);
+        o_members_.clear();
+        a_members_.clear();
+        vault_.Flush();
+    }
 };
 
 
@@ -499,7 +419,7 @@ private:
 
     void ParseRecursive(ChWrapper ch, Entity& e) {
         ParseValue(ch, e);
-        if (!IsEndOfStream(ch)) {
+        if (ch.Peek() != '\0') {
             ThrowInvalidIdentifier(ch);
         }
     }

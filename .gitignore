@@ -2,12 +2,10 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/jspx.sln
-/roadmap.htm
-/jspx.vcxproj.filters
-/jspx.vcxproj
-/jspx.cpp
-/jspx.vcxproj.user
+/*.sln
+/*.htm
+/*.vcxproj
+/*.vcxproj.*
+/*.cpp
 /Debug
 /.vs
-/x64

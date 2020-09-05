@@ -1,10 +1,10 @@
 # JSPX
-Header-only JSON Parsing Library based in C++
+Header-only C++ based JSON Parsing Library
 
 
 ## Introduction
 
-JSPX is fast and light weight JSON Parser created in C++17.
+JSPX is fast and light weight JSON Parser developed in C++17.
 
 * Uses STL containers. Does not rely on Boost.
 * Supports DOM-style JSON parsing. Transforms input stream into DOM tree which can be traversed and converted into desired form. Current implementation is <b>read-only</b>.

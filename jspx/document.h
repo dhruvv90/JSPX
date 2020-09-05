@@ -10,11 +10,15 @@
 
 JSPX_NAMESPACE_BEGIN
 
+class Entity;
+typedef typename std::unique_ptr<Entity> EntitySP;
+typedef typename std::unordered_map<std::string, EntitySP>::const_iterator ObjectIterator;
+typedef typename std::vector<EntitySP>::const_iterator ArrayIterator;
+
+
 class Entity : public virtual Throwable {
 
 private:
-    typedef typename std::unique_ptr<Entity> EntitySP;
-
     enum class Identifier {
         kOpenSquareBracket = '[',
         kCloseSquareBracket = ']',
@@ -143,6 +147,35 @@ public:
         }
         return *a_members_.at(idx).get();
     }
+
+    ArrayIterator ABegin() const {
+        if (!IsArray()) {
+            ThrowInvalidMethodCall();
+        }
+        return a_members_.begin();
+    }
+
+    ArrayIterator AEnd() const {
+        if (!IsArray()) {
+            ThrowInvalidMethodCall();
+        }
+        return a_members_.end();
+    }
+
+    ObjectIterator OBegin() const {
+        if (!IsObject()) {
+            ThrowInvalidMethodCall();
+        }
+        return o_members_.begin();
+    }
+
+    ObjectIterator OEnd() const {
+        if (!IsObject()) {
+            ThrowInvalidMethodCall();
+        }
+        return o_members_.end();
+    }
+
 
 private:
     void Move(Entity& target, Entity& source) {
